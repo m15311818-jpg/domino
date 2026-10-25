@@ -1,231 +1,259 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🏆 تحدي الدومينو الخيري - دعم 57357</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-    body { background: #0a0e17; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-    .card { background: rgba(30, 35, 60, 0.9); border: 1px solid rgba(100, 120, 200, 0.3); border-radius: 20px; padding: 30px; width: 100%; max-width: 600px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); text-align: center; position: relative; overflow: hidden; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 تحدي الدومينو الخيري - 57357</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     
-    /* شاشة الدخول */
-    input { width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(10, 15, 35, 0.9); border: 2px solid #a064ff; border-radius: 12px; color: #fff; text-align: center; font-size: 18px; letter-spacing: 2px; }
-    button { width: 100%; padding: 15px; border: none; border-radius: 12px; background: linear-gradient(135deg, #ff5050, #ff8800); color: #fff; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; }
-    button:hover { transform: scale(1.02); box-shadow: 0 5px 20px rgba(255, 80, 80, 0.4); }
-    .hidden { display: none !important; }
-    
-    /* شاشة اللعب */
-    .header-game { display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333; }
-    .player-info { text-align: center; }
-    .player-info h3 { font-size: 16px; color: #8892c0; }
-    .player-info .score { font-size: 24px; font-weight: bold; color: #00dcc8; }
-    
-    /* لوحة الدومينو */
-    .domino-board { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; min-height: 100px; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 15px; }
-    .domino-piece { width: 50px; height: 100px; background: #fff; border-radius: 8px; display: flex; flex-direction: column; border: 2px solid #000; cursor: pointer; transition: 0.2s; }
-    .domino-piece:hover { transform: scale(1.1); }
-    .domino-half { flex: 1; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; padding: 5px; gap: 3px; }
-    .domino-half:first-child { border-bottom: 2px solid #000; }
-    .dot { width: 8px; height: 8px; background: #000; border-radius: 50%; }
-    
-    /* أزرار التحكم */
-    .controls { display: flex; gap: 10px; margin-top: 20px; }
-    .btn-draw { background: linear-gradient(135deg, #00dcc8, #0088ff); }
-    .btn-pass { background: rgba(255,255,255,0.1); border: 1px solid #555; }
-    
-    /* شاشة الفوز */
-    .win-screen { position: absolute; inset: 0; background: rgba(10, 14, 23, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; padding: 20px; }
-    .win-screen h2 { font-size: 32px; color: #ffd700; margin-bottom: 10px; }
-    .charity-box { background: rgba(255, 215, 0, 0.1); border: 2px dashed #ffd700; padding: 20px; border-radius: 15px; margin: 20px 0; font-size: 18px; font-weight: bold; }
-</style>
+    <!-- مكتبة Firebase للاتصال اللحظي -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+        // ⚠️ ضع إعدادات Firebase الخاصة بك هنا
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+        };
+        const app = initializeApp(firebaseConfig);
+        window.db = getDatabase(app);
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbOnValue = onValue;
+        window.dbUpdate = update;
+        
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { background: #0b0e14; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        
+        .screen { width: 100%; max-width: 800px; background: rgba(25, 30, 50, 0.95); border: 1px solid #ff8800; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(255, 136, 0, 0.2); text-align: center; }
+        .hidden { display: none !important; }
+        
+        /* شاشة البداية */
+        .hero-title { font-size: 32px; color: #ff8800; margin-bottom: 10px; }
+        .hero-desc { color: #aab; margin-bottom: 30px; line-height: 1.6; }
+        
+        /* شاشة اللعب */
+        .game-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+        .player-box { background: #1a1f2e; padding: 10px 20px; border-radius: 10px; border: 1px solid #444; }
+        .player-box.active { border-color: #00dcc8; box-shadow: 0 0 15px rgba(0, 220, 200, 0.3); }
+        .score { font-size: 24px; font-weight: bold; color: #00dcc8; }
+        
+        /* اللوحة */
+        .board { min-height: 150px; background: #0f131c; border-radius: 15px; padding: 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; border: 2px dashed #333; margin-bottom: 20px; }
+        
+        /* القطع */
+        .piece { width: 50px; height: 100px; background: #e8e8e8; border-radius: 8px; display: flex; flex-direction: column; border: 2px solid #333; cursor: pointer; transition: 0.2s; }
+        .piece:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+        .half { flex: 1; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; padding: 5px; gap: 3px; }
+        .half:first-child { border-bottom: 2px solid #333; }
+        .dot { width: 8px; height: 8px; background: #111; border-radius: 50%; }
+        
+        /* شاشة التبرع */
+        .donate-screen { background: #1a1f2e; border: 2px solid #ff8800; border-radius: 15px; padding: 30px; margin-top: 20px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 10px rgba(255, 136, 0, 0.2); } 50% { box-shadow: 0 0 25px rgba(255, 136, 0, 0.6); } }
+        .phone-num { font-size: 28px; font-weight: bold; color: #ff8800; letter-spacing: 2px; direction: ltr; }
+        .btn { padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; background: #00dcc8; color: #000; }
+        .btn:hover { background: #00b8a3; }
+    </style>
 </head>
 <body>
 
-<div class="card" id="registerScreen">
-    <h1 style="margin-bottom: 20px;">🏆 تحدي الدومينو الخيري</h1>
-    <p style="color: #8892c0; margin-bottom: 30px;">أدخل رقم فودافون كاش الخاص بك للانضمام للتحدي. الفائز سيتبرع بـ 10 جنيهات لمستشفى 57357.</p>
-    <input type="tel" id="playerPhone" placeholder="01xxxxxxxxx">
-    <button onclick="startGame()">ابدأ التحدي الآن 🎮</button>
-</div>
+    <!-- 1. شاشة الدخول -->
+    <div class="screen" id="entryScreen">
+        <h1 class="hero-title">🏆 تحدي الدومينو الخيري</h1>
+        <p class="hero-desc">
+            مرحباً بك في تحدي الأصدقاء!<br>
+            <b>القاعدة:</b> الفائز في المباراة يتبرع بـ <b>10 جنيهات</b> لمستشفى 57357 لدعم أطفالنا. دعمك هو وسام فخرك!
+        </p>
+        <input type="text" id="myPhone" placeholder="أدخل رقم هاتفك للتواصل" style="padding: 15px; width: 100%; max-width: 300px; border-radius: 10px; border: none; text-align: center; font-size: 16px; margin-bottom: 20px;">
+        <br>
+        <button class="btn" onclick="startGame()">ابدأ التحدي الآن ⚔️</button>
+    </div>
 
-<div class="card hidden" id="gameScreen">
-    <div class="header-game">
-        <div class="player-info">
-            <h3>أنت (اللاعب 1)</h3>
-            <div class="score" id="score1">0</div>
+    <!-- 2. شاشة اللعب -->
+    <div class="screen hidden" id="gameScreen">
+        <div class="game-header">
+            <div class="player-box active" id="p1Box">
+                <div>أنت (اللاعب 1)</div>
+                <div class="score" id="p1Score">0</div>
+            </div>
+            <div style="font-size: 24px; color: #ff8800;">VS</div>
+            <div class="player-box" id="p2Box">
+                <div>صديقك (اللاعب 2)</div>
+                <div class="score" id="p2Score">0</div>
+            </div>
         </div>
-        <div class="player-info" style="color: #ff5050; font-size: 30px;">VS</div>
-        <div class="player-info">
-            <h3>صديقك (اللاعب 2)</h3>
-            <div class="score" id="score2">0</div>
-        </div>
-    </div>
 
-    <div class="domino-board" id="board">
-        <!-- سيتم وضع قطع الدومينو هنا -->
-    </div>
-
-    <p id="turnMessage" style="font-weight: bold; color: #00dcc8;">دورك الآن: اختر قطعة دومينو</p>
-
-    <div class="controls">
-        <button class="btn-pass" onclick="passTurn()">تخطي الدور</button>
-    </div>
-
-    <div class="win-screen hidden" id="winScreen">
-        <h1>🎉 مبروك!</h1>
-        <h2 id="winnerText">لقد فزت بالتحدي!</h2>
-        <p>بصفتك الفائز، يرجى إتمام التبرع لدعم أطفال 57357.</p>
+        <p id="turnText" style="color: #00dcc8; font-weight: bold; font-size: 18px; margin-bottom: 10px;">دورك الآن: اضغط على قطعة للعب</p>
         
-        <div class="charity-box">
-            💳 قم بتحويل 10 جنيهات إلى:<br>
-            <span style="color: #00dcc8; font-size: 24px;">0100199999</span><br>
-            <small>(محفظة مستشفى 57357)</small>
+        <div class="board" id="board">
+            <!-- سيتم رسم القطع هنا -->
         </div>
         
-        <button onclick="location.reload()" style="margin-top: 15px;">🔄 العب مرة أخرى</button>
+        <button class="btn" style="background: #444; color: #fff;" onclick="passTurn()" id="passBtn">تخطي الدور ⏭️</button>
     </div>
-</div>
 
-<script>
-    // بيانات اللعبة
-    let player1Score = 0;
-    let player2Score = 0;
-    let currentPlayer = 1; // 1 أو 2
-    let deck = [];
-    let boardPieces = [];
+    <!-- 3. شاشة الفائز (اللي هيدفع) -->
+    <div class="screen hidden" id="winScreen">
+        <h1 style="color: #00ff88; font-size: 36px; margin-bottom: 10px;">🎉 مبروك الفوز!</h1>
+        <p style="color: #aab; font-size: 18px; margin-bottom: 20px;">بصفتك الفائز في هذا التحدي، حان وقت رد الجميل ودعم مستشفى 57357.</p>
+        
+        <div class="donate-screen">
+            <h2>يرجى تحويل <span style="color: #ff8800;">10 جنيهات</span> عبر فودافون كاش إلى:</h2>
+            <br>
+            <div class="phone-num">0100199999</div>
+            <br>
+            <p style="color: #888; font-size: 14px; margin-top: 10px;">(حساب مستشفى 57357 الخيري)</p>
+        </div>
 
-    // إنشاء قطع الدومينو (من 0-0 إلى 6-6)
-    function createDeck() {
-        const suits = [0, 1, 2, 3, 4, 5, 6];
-        let newDeck = [];
-        for (let i = 0; i < suits.length; i++) {
-            for (let j = i; j < suits.length; j++) {
-                newDeck.push({ top: suits[i], bottom: suits[j] });
+        <br>
+        <button class="btn" onclick="location.reload()" style="background: #aab; color: #000;">لعب مباراة أخرى 🔄</button>
+    </div>
+
+    <!-- 4. شاشة الخاسر (اللي بيشجع) -->
+    <div class="screen hidden" id="loseScreen">
+        <h1 style="color: #ff5050; font-size: 36px; margin-bottom: 10px;">💔 حظ أوفر!</h1>
+        <p style="color: #aab; font-size: 18px; margin-bottom: 20px;">صديقك هو من فاز، وبالتالي هو من سيتبرع. لكن لا بأس، يمكنك أنت أيضاً التبرع لمن يرغب!</p>
+        
+        <button class="btn" onclick="location.reload()">لعب مباراة أخرى 🔄</button>
+    </div>
+
+    <script type="module">
+        let currentPlayer = 1;
+        let p1Score = 0;
+        let p2Score = 0;
+        let deck = [];
+        
+        window.startGame = function() {
+            const phone = document.getElementById('myPhone').value;
+            if(!phone) { alert("أدخل رقم هاتفك للتواصل"); return; }
+            
+            document.getElementById('entryScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            initDeck();
+            renderBoard();
+        };
+
+        function initDeck() {
+            const suits = [0, 1, 2, 3, 4, 5, 6];
+            deck = [];
+            for(let i=0; i<suits.length; i++) {
+                for(let j=i; j<suits.length; j++) {
+                    deck.push({ top: suits[i], bottom: suits[j] });
+                }
+            }
+            deck.sort(() => Math.random() - 0.5);
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            // عرض 5 قطع عشوائية للاختيار من بينها
+            for(let i=0; i<5; i++) {
+                if(!deck[i]) break;
+                const piece = deck[i];
+                const el = document.createElement('div');
+                el.className = 'piece';
+                el.onclick = () => playPiece(i);
+                el.innerHTML = `
+                    <div class="half">${renderDots(piece.top)}</div>
+                    <div class="half">${renderDots(piece.bottom)}</div>
+                `;
+                board.appendChild(el);
             }
         }
-        return newDeck.sort(() => Math.random() - 0.5); // خلط
-    }
 
-    // بدء اللعبة
-    window.startGame = function() {
-        const phone = document.getElementById('playerPhone').value;
-        if (!phone || phone.length < 11) {
-            alert('❌ يرجى إدخال رقم فودافون كاش صحيح (11 رقم)');
-            return;
+        function renderDots(num) {
+            let html = '';
+            for(let i=0; i<num; i++) html += '<div class="dot"></div>';
+            return html || '<div style="font-size:12px; color:#999;">0</div>';
         }
-        document.getElementById('registerScreen').classList.add('hidden');
-        document.getElementById('gameScreen').classList.remove('hidden');
-        
-        deck = createDeck();
-        // توزيع 7 قطع لكل لاعب
-        renderBoard();
-        updateTurn();
-    }
 
-    // عرض القطع في اللوحة
-    function renderBoard() {
-        const board = document.getElementById('board');
-        board.innerHTML = '';
-        
-        // نعرض 5 قطع متاحة للاختيار فقط لتسهيل اللعبة
-        const availablePieces = deck.slice(0, 5);
-        
-        availablePieces.forEach((piece, index) => {
-            const pieceDiv = document.createElement('div');
-            pieceDiv.className = 'domino-piece';
-            pieceDiv.onclick = () => playPiece(index);
+        function playPiece(index) {
+            if(currentPlayer !== 1) {
+                alert("ليس دورك الآن! انتظر صديقك.");
+                return;
+            }
             
-            pieceDiv.innerHTML = `
-                <div class="domino-half">${renderDots(piece.top)}</div>
-                <div class="domino-half">${renderDots(piece.bottom)}</div>
-            `;
-            board.appendChild(pieceDiv);
-        });
-    }
-
-    // رسم النقاط
-    function renderDots(num) {
-        let html = '';
-        for(let i=0; i<num; i++) html += '<div class="dot"></div>';
-        return html || '<div style="color:#ccc;font-size:12px;">0</div>';
-    }
-
-    // اللعب
-    function playPiece(index) {
-        if (currentPlayer !== 1) {
-            alert('ليس دورك الآن!');
-            return;
-        }
-        
-        // محاكاة لعب اللاعب
-        const piece = deck[index];
-        player1Score += (piece.top + piece.bottom);
-        document.getElementById('score1').innerText = player1Score;
-        
-        // إزالة القطعة من المجموعة
-        deck.splice(index, 1);
-        
-        // دور الكمبيوتر/الصديق
-        currentPlayer = 2;
-        updateTurn();
-        
-        setTimeout(() => {
-            // محاكاة لعب الصديق (لعب عشوائي)
-            const randomIndex = Math.floor(Math.random() * deck.length);
-            const friendPiece = deck[randomIndex];
-            player2Score += (friendPiece.top + friendPiece.bottom);
-            document.getElementById('score2').innerText = player2Score;
-            deck.splice(randomIndex, 1);
-            
-            currentPlayer = 1;
-            updateTurn();
-            renderBoard();
+            // أنت لعبت
+            const piece = deck[index];
+            p1Score += (piece.top + piece.bottom);
+            document.getElementById('p1Score').innerText = p1Score;
+            deck.splice(index, 1);
             
             checkWin();
-        }, 1500);
-    }
-
-    function passTurn() {
-        if (currentPlayer !== 1) return;
-        currentPlayer = 2;
-        updateTurn();
-        setTimeout(() => {
-            currentPlayer = 1;
-            updateTurn();
-        }, 1500);
-    }
-
-    function updateTurn() {
-        const msg = document.getElementById('turnMessage');
-        if (currentPlayer === 1) {
-            msg.innerText = "دورك الآن: اختر قطعة دومينو";
-            msg.style.color = "#00dcc8";
-        } else {
-            msg.innerText = "صديقك يلعب الآن... ⏳";
-            msg.style.color = "#ff5050";
-        }
-    }
-
-    function checkWin() {
-        if (player1Score >= 15 || player2Score >= 15) {
-            let winner = player1Score > player2Score ? 1 : 2;
-            let winScreen = document.getElementById('winScreen');
-            let winnerText = document.getElementById('winnerText');
-            
-            if (winner === 1) {
-                winnerText.innerText = "لقد فزت بالتحدي! 🎉";
-                winnerText.style.color = "#64ff96";
-            } else {
-                winnerText.innerText = "صديقك فاز بالتحدي! 😢";
-                winnerText.style.color = "#ff5050";
+            if(document.getElementById('winScreen').classList.contains('hidden') && document.getElementById('loseScreen').classList.contains('hidden')) {
+                // دور الخصم
+                currentPlayer = 2;
+                updateUI();
+                
+                setTimeout(() => {
+                    // الخصم بيلعب
+                    if(deck.length === 0) initDeck(); // لو خلصت القطع نعيد التدوير
+                    const rndIndex = Math.floor(Math.random() * deck.length);
+                    const oppPiece = deck[rndIndex];
+                    p2Score += (oppPiece.top + oppPiece.bottom);
+                    document.getElementById('p2Score').innerText = p2Score;
+                    deck.splice(rndIndex, 1);
+                    
+                    currentPlayer = 1;
+                    updateUI();
+                    renderBoard();
+                    checkWin();
+                }, 1500);
             }
-            
-            winScreen.classList.remove('hidden');
         }
-    }
-</script>
 
+        function passTurn() {
+            if(currentPlayer !== 1) return;
+            currentPlayer = 2;
+            updateUI();
+            setTimeout(() => {
+                currentPlayer = 1;
+                updateUI();
+            }, 1000);
+        }
+
+        function updateUI() {
+            const turnText = document.getElementById('turnText');
+            const p1Box = document.getElementById('p1Box');
+            const p2Box = document.getElementById('p2Box');
+            const passBtn = document.getElementById('passBtn');
+            
+            if(currentPlayer === 1) {
+                turnText.innerText = "دورك الآن: اختر قطعة للعب";
+                turnText.style.color = "#00dcc8";
+                p1Box.classList.add('active');
+                p2Box.classList.remove('active');
+                passBtn.disabled = false;
+            } else {
+                turnText.innerText = "صديقك يلعب الآن... ⏳";
+                turnText.style.color = "#ff8800";
+                p1Box.classList.remove('active');
+                p2Box.classList.add('active');
+                passBtn.disabled = true;
+            }
+        }
+
+        function checkWin() {
+            // شرط الفوز: من يصل إلى 20 نقطة أولاً
+            if(p1Score >= 20 || p2Score >= 20) {
+                document.getElementById('gameScreen').classList.add('hidden');
+                if(p1Score >= 20) {
+                    document.getElementById('winScreen').classList.remove('hidden');
+                } else {
+                    document.getElementById('loseScreen').classList.remove('hidden');
+                }
+            }
+        }
+    </script>
 </body>
 </html>
